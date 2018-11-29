@@ -30,6 +30,7 @@
 #include <time.h>
 #include "mutt/mutt.h"
 #include "conn/conn.h"
+#include "mailbox.h"
 #ifdef USE_HCACHE
 #include "hcache/hcache.h"
 #endif
@@ -38,6 +39,7 @@ struct Context;
 struct Email;
 struct ImapEmailData;
 struct Mailbox;
+struct MailboxList;
 struct Message;
 struct Progress;
 
@@ -225,8 +227,8 @@ struct ImapAccountData
   struct Buffer *cmdbuf;
 
   char delim;
-  struct Context *ctx;
-  struct Mailbox *mailbox;     /* Current selected mailbox */
+  struct Mailbox *mailbox;          /* Current selected mailbox */
+  struct MailboxList mailboxes;     /* Previous selected mailbox */
 };
 
 /**
@@ -239,6 +241,8 @@ struct ImapMboxData
   char *name;        /**< Mailbox name */
   char *munge_name;  /**< Munged version of the mailbox name */
   char *real_name;   /**< Original Mailbox name, e.g.: INBOX can be just \0 */
+
+  struct Context *ctx;
 
   unsigned char reopen;        /**< Flags, e.g. #IMAP_REOPEN_ALLOW */
   unsigned short check_status; /**< Flags, e.g. #IMAP_NEWMAIL_PENDING */
@@ -291,6 +295,8 @@ int imap_exec_msgset(struct ImapAccountData *adata, const char *pre, const char 
                      int flag, bool changed, bool invert);
 int imap_open_connection(struct ImapAccountData *adata);
 void imap_close_connection(struct ImapAccountData *adata);
+void imap_select_mailbox(struct Mailbox *m);
+int imap_fetch_mailbox(struct Mailbox *m);
 int imap_read_literal(FILE *fp, struct ImapAccountData *adata, unsigned long bytes, struct Progress *pbar);
 void imap_expunge_mailbox(struct ImapAccountData *adata);
 int imap_login(struct ImapAccountData *adata);
